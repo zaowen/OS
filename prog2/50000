@@ -1,0 +1,20 @@
+USER       PID %CPU %MEM    VSZ   RSS TTY      STAT START   TIME COMMAND
+khan      2919  0.0  0.0  33964  4500 ?        Ss   10:54   0:00 /usr/lib/systemd/systemd --user
+khan      2927  0.0  0.0  97432  1920 ?        S    10:54   0:00 (sd-pam)
+khan      2968  0.0  0.0  13648  3088 tty1     Ss+  10:54   0:00 /bin/sh /usr/bin/startx
+khan      3292  0.0  0.0  15924   980 tty1     S+   10:54   0:00 xinit /home/khan/.xinitrc -- /etc/X11/xinit/xserverrc :0 vt1 -auth /tmp/serverauth.V3dEJfixfA
+khan      3293  1.3  0.8 308824 64708 tty1     Sl   10:54   3:17 /usr/lib/xorg-server/Xorg -nolisten tcp :0 vt1 -auth /tmp/serverauth.V3dEJfixfA
+khan      3298  0.0  0.1 151476 12696 tty1     S    10:54   0:02 i3
+khan      3305  0.0  0.0  32880  3656 ?        Ss   10:54   0:00 /usr/bin/dbus-daemon --session --address=systemd: --nofork --nopidfile --systemd-activation
+khan      3309  0.0  0.0  13652  3000 ?        S    10:54   0:00 /bin/bash /home/khan/bin/wallpaper.sh
+khan      3315  0.3  0.1 136772 11380 ?        S    10:54   0:50 i3bar --bar_id=bar-0 --socket=/run/user/1000/i3/ipc-socket.3298
+khan      3325  0.0  0.0   4204  1528 ?        S    10:54   0:06 i3blocks -c /home/khan/.config/i3/i3blocks.conf
+khan      3357  0.5  0.1 415584 11704 ?        S<sl 10:54   1:24 /usr/bin/pulseaudio --daemonize=no
+khan      3573  0.0  0.0  60720  5296 ?        S    10:54   0:00 /usr/lib/GConf/gconfd-2
+khan      3588  0.0  0.0 339612  7368 ?        Ssl  10:54   0:00 /usr/lib/at-spi2-core/at-spi-bus-launcher
+khan      4019  0.1  0.5 367044 42388 ?        Sl   14:56   0:00 /usr/bin/python2 /usr/bin/terminator
+khan      4024  0.0  0.0  16032  3700 pts/0    Ss   14:56   0:00 /bin/bash
+khan      5130  0.0  0.0   6752  1916 pts/0    S+   14:57   0:00 ./dsh
+khan      6909  0.0  0.0   5836   692 ?        S    14:59   0:00 sleep 5m
+khan      7185  0.0  0.0  34616  3220 pts/0    R+   15:04   0:00 ps ux
+khan     31343  0.0  0.0  52580  4552 ?        S    13:02   0:00 /usr/lib/xfce4/xfconf/xfconfd

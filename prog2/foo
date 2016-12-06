@@ -1,0 +1,14 @@
+50000
+client
+client.c
+dsh
+dsh.c
+dsh.o
+foo
+localhost
+Makefile
+prog2.pdf
+prog2.tgz
+server
+server.c
+socketfunction
