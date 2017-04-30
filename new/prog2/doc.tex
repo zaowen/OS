@@ -1,0 +1,205 @@
+\documentclass[11pt]{article}
+%Gummi|065|=)
+\title{\textbf{Managing Resources}}
+\author{Zachary Owen}
+\date{}
+\begin{document}
+
+\maketitle
+
+\section{Memory Manager}
+
+This is a simple program that translates a 32-bit virtual address with a 4-KB page size to a Virtual Address. The program is passed a virtual address (in decimal) on the command line and  outputs the page number and offset for the given address.  As an example, the program would run as follows: 
+\begin{verbatim}
+./memman 19986
+\end{verbatim}
+ The program outputs: 
+ \begin{verbatim}
+ The address 19986 contains: 
+ page number = 4 
+ offset = 3602 
+ \end{verbatim}
+ The program can be built and run using the commands: 
+ \begin{verbatim}
+make
+./memman <address>
+\end{verbatim}
+
+\subsection{Functionality: main.c}
+
+This is a short program, all of the code is in main.c
+
+\subsubsection{ int main ( int argc, char * argv[])}
+
+This function begins by checking \textit{argc} for a value of at least 2, ensuring that at least one argument has been provided. Any furthur arguments are ignored. After this the value is passed to the \textbf{strtol()} function and then checked to see if an overflow has occured or if something non-number like has been passed in. Both will generate appropreate error messages.
+\\\\
+Finally the upper 20 bits are extracted and printed as the page number, and the lower 12 bits are masked to obtainthe offset. Both are printed and the program exits.
+\vfill
+
+\section{The Bankers Algorithm}
+This program is a multithreaded program that implements the banker’s algorithm discussed in Section 7.5.3.  Several customers request and release resources from the bank.  The banker will grant a request only if it leaves the system in a safe state.  A request that leaves the system in an unsafe state will be denied.  This programming combines three separate topics: 
+\begin{enumerate}
+\item multithreading
+\item preventing race conditions
+\item deadlock avoidance. 
+\end{enumerate}
+
+
+\subsection{Functionality: bankers.c}
+This is the start-point of the program. It contains all initialization functions. It sets up each Mutex and all of the shared static memory used by the other files.o
+
+\subsubsection{ void init\textunderscore all\textunderscore the\textunderscore things() } 
+This function initalizes the mutex, seeds \textbf{srand()} and finally, seeds the \textit{maximum, allocation} and \textit{need} arrays. During testing it was noticed that equal distribution of process lead to large amount's of unsafe requests. In order to mitigate this issue the \textit{maximum} array is seeded with the following equation
+$$pmax_{i,j} = MAX_i - \sqrt{ \textbf{rand()} - MAX_i^2} $$
+Where : \\
+\textit{pmax}: is the maximum of \textit{i} resource requred by \textit{j} process\\
+\textit{MAX}: is the maximum avalable to the system of resource \textit{i}\\
+\textbf{rand()}: is the random function
+\\
+\\
+This increases the prevelence of smaller numbers. Additionally the \textbf{isqrt()} function is called instead of the standard math library square root function since the return value would always need to be floored anyway.
+\\
+The function also takes the program inputs, converts them into integers and then places them into the \textit{MAX} array. It also checks for overflow and improper input.
+
+\subsubsection{ int main ( int argc, char * argv[])}
+This function is the start point of the program. It checks for the correct number of input variables, then calls the \textbf{ init\textunderscore all\textunderscore the\textunderscore things()} function and then spins up the required number of threads and waits for them to join back up and then exits.
+
+\subsection{Functionality: bank.c}
+This file contains no functions but serves the dumping ground for all of the global variables defines and mutex that the program uses.
+\begin{itemize}
+\item \textit{ NUMBER\textunderscore OF\textunderscore CUSTOMERS}: Define telling the number of customer threads for main to create
+\item \textit{NUMBER\textunderscore OF\textunderscore RESOURCES}: Define telling main how many resorces to look for from user input.
+\item \textit{ CUSTOMER\textunderscore GOES}: How many requests should each thread make before exiting
+\item \textit{ HEAD\textunderscore SLEEP}: How long each thread sleeps between request
+\item \textit{ available }: Maximum available resourse, set in main.
+\item \textit{ maximum }: Maximum number of resources that a process will ask for.
+\item \textit{ allocation }: How many of each resource is currently allocated to each process.
+\item \textit{ need }: Diffrence between the \textit{maximum} and \textit{allocation} arrays
+\item \textit{ MAX\textunderscore RESOURCE}: Maximum amount of resources in this simulation
+\item \textit{ READ }: The read-write mutex.
+\end{itemize}
+
+\subsection{Functionality: customer.c}
+This section contains the breadth of the executing code, as well as all of the functions requrired by the threads and several helper functions that get called in \textbf{main()}.
+
+\subsubsection{ void* customer( void *)}
+This funtion is the pthread function. It's execution is mostly handled in helper functions. Its execution can be described as followed:
+
+\begin{enumerate}
+\item Randomly create a resource request with \textbf{make\textunderscore need()}
+\item Make a system request for those resources with \textbf{request\textunderscore resources()}
+
+\begin{enumerate}
+\item If you get it sit on those resources for a while, release them with \textbf{release\textunderscore resources()}, and then start again.
+\item If not wait for a bit, and go through the loop again without decrementing your counter.
+\end{enumerate}
+\end{enumerate}
+
+\subsubsection{ int isqrt( int )}
+I have no idea how this function works, It's pretty sweet though and I found it here \textit{https://en.wikipedia.org/wiki/Integer\textunderscore square\textunderscore root}
+
+\subsubsection{ void make\textunderscore need()}
+A simple \textbf{for} loop that generates needs in a similar way to how they are generated in  \textbf{init\textunderscore all\textunderscore the\textunderscore things()} using the following equation:
+$$request_{i} = MAX_i - \sqrt{ \textbf{rand()} - MAX_i^2} $$
+Where : \\
+\textit{request}: is the resource requred by the process\\
+\textit{MAX}: is the maximum avalable to the system of resource \textit{i}\\
+\textbf{rand()}: is the random function
+\\
+This increases the prevelence of smaller numbers. Additionally the \textbf{isqrt()} function is called instead of the standard math library square root function since the return value would always need to be floored anyway.
+
+\subsubsection{ void print\textunderscore req (int )}
+Helper function called in \textbf{request\textunderscore resources()} just prints out 
+ \begin{verbatim}
+Request P# <#, #, #>
+\end{verbatim}
+
+\subsubsection{int request\textunderscore resources(int, int *)}
+
+This function fully handles the process of aquriring resouces. The first thing it does is aquire the lock on the \textit{READ} mutex. Then it prints a message telling the user that it is attempting to make the request using \textbf{print\textunderscore req ()}. Then the process uses \textbf{alloc\textunderscore req()} to allocate the resources for itself, then it runs \textbf{safety\textunderscore test()}. If the system is safe, it prints a message indicating as such, prints the current state of the system using \textbf{print\textunderscore state()} and finally unlocks the mutex and returns with an integer 1 on successs and 0 on failure.
+
+\subsubsection{ void release\textunderscore resources(int, int *)}
+Aquires the \textit{READ} lock and then reclaims the calling process's resources.
+
+\subsubsection{ void print\textunderscore state()}
+Long function that prints out the number of resources each process has, its maximum allowed resouces and the currently available:
+
+\begin{verbatim}
+        Allocation      Need     Available    
+          A B C       A B C       A B C 
+P0        0 1 0       7 4 3       3 3 2 
+P1        3 0 2       1 2 2 
+P2        3 0 2       6 0 0 
+P3        2 1 1       0 1 1 
+P4        0 0 2       4 3 1
+
+\end{verbatim}
+
+\subsubsection{ void alloc\textunderscore req(int, int*)}
+
+This function adds the request matrix to the process's allocation array while subtracting them from the process's need array and the global resouce pool.
+
+\subsubsection{ void free\textunderscore req(int, int*)}
+
+This function subtracts the request matrix to the process's allocation array while adding them from the process's need array and the global resouce pool.
+
+\subsubsection{ int saftey\textunderscore test()}
+
+This fucntion performs the Banker's algorithm on the current system state.
+
+The Banker's Algorithm is used in finding out whether or not a system is or isn't a safe state. This algorithm can be described as follows:
+\begin{enumerate}
+\item Let Work and Finish be vectors of length m and n,respectively. Initialize Work = Available and Finish[i] = false for i= 0, 1, ...,n−1.
+\item Find an index i such that both
+	
+	\begin{enumerate}
+	\item Finish[i]==false
+	\item Need i $ \leq$ Work If no such i exists, go to step 4
+	\end{enumerate}
+\item Work=Work+AllocationiFinish[i]=trueGo to step 2.
+\item If Finish[i]== true for all i,then the system is in a safe state.This algorithm may require an order of $m\times n^2$ operations to determine whether a state is safe.
+\end{enumerate}
+
+\subsubsection{ void add\textunderscore arr( int* , int*)}
+
+Helper function that adds the first array to the second.
+
+\subsubsection{ int can\textunderscore finish( int*, int*)}
+
+Helper function that make sure that all of the values in the second matrix are greater than or equal to the first. Used in the bankers algorithm to see if a process can finish.
+
+\end{document}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

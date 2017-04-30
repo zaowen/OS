@@ -1,0 +1,146 @@
+\documentclass[11pt]{article}
+%Gummi|065|=)
+\title{\textbf{How to service as many Disks as fast as you can}}
+\author{Zachary Owen}
+\date{}
+\begin{document}
+
+\maketitle
+
+\section{Disk-Scheduling Algorithms}
+
+This program will service a disk with 5,000 cylinders numbered 0 to 4,999.  The program will generate a random series of 1,000 cylinder requests and service them according to each of the algorithms listed below.  
+\begin{itemize}
+\item FCFS (First Come, First Serve)
+\item SSTF (Shortest Seek Time First)
+\item SCAN
+\item C-SCAN
+\item LOOK
+\item C-LOOK
+\end{itemize}
+ The program can be passed the initial position of the disk head (as a parameter on the command line) and report the total amount of head movement required by each algorithm.
+
+\begin{verbatim}
+./disk_sched 1000
+\end{verbatim}
+ The program outputs: 
+ \begin{verbatim}
+First Come, First Serve took 1607558 time units
+Shortest Seek Time First, took 5986 time units
+SCANing, right took 8994 time units
+SCANing, left  took 5998 time units
+C-SCANing, right took 4993 time units
+C-SCANing, left  took 1002 time units
+LOOKing, right took 4000 time units
+LOOKing, left  took 5986 time units
+C-LOOK, right took 4993 time units
+C-LOOK, left  took 5000 time units
+ 
+ \end{verbatim}
+ The program can be built and run using the commands: 
+ \begin{verbatim}
+make
+./disk_sched <read head start position>
+\end{verbatim}
+
+\subsection{Functionality: request.c}
+
+In order to make testing easier and make the program more \textit{modular} the function to create requests lies within this folder. This is so that if the user chooses, her or she may replace \textit{request.c} with his or her own function to make requests.
+
+\subsubsection{ int make\textunderscore reqs( int * req) }
+
+This function generates \textit{n} random numbers from 0 to \textit{m}. \textit{n} is defined in \textit{request.h} as \textbf{REQUESTS}, and \textit{m} is defined in the same file and is named \textbf{DISK\textunderscore MAX}.
+\\
+If the program is compiled the \textbf{DEBUG} defined, then this function will also print its array.
+\\
+If a diffrent algorithm is desired for generating read requests it can either be placed here.
+\vfill
+
+\subsection{ Functionality: main.c}
+This file contains all of the computational code for running this program. It starts by parsing the command line arguments and getting the request array, it then calls each of the schedualing algorithms in order and then exits.
+
+\subsubsection { int main ( int argc , char * argv[])}
+
+The main function of this program exists to do error checking on data and call the various schedualing algorithms. It begins by checking the number of command line arguments, followed by a \textit{strtol()} on \textbf{argv[1]}. This function nessessitates that we then check out of range errors in both the min and max directions, then the result is checked for any digits at all, and finally it is assured that the head start position is between 0 and \textbf{DISK\textunderscore MAX}.
+\\
+Then \textit{main()} calls \textit{ make\textunderscore reqs()} funciton from \textit{request.c}. Then it calls each of the schedulers.
+\begin{itemize}
+\item FCFS (First Come, First Serve)
+\item SSTF (Shortest Seek Time First)
+\item SCAN
+\item C-SCAN
+\item LOOK
+\item C-LOOK
+\end{itemize}
+
+\subsubsection{ void FCFS ( int address ,  int * req )}
+This scheduler has the read head move from its starting position to every request in order. The algorithm works in a simmilar way by reading each number in the request array calculating the distance between the head and itself, and then setting the head to the given position and repeating.
+
+
+\subsubsection{ void SSTF ( int address ,  int * req )}
+This scheduler services the request that is closest to it's current position on the platter. The program simulates this by checking every number in the request array for closeness to the read head, then calculates its distance from the read head, adds that number to a sum, moves the read head and continues.
+
+\subsubsection{ void SCAN ( int address ,  int * req )}
+The SCAN algorithm begins by sorting the requests using \textit{bucket\textunderscore sort}. Then it finds where in this array the \textbf{address} would be using \textit{find\textunderscore median}. At this point there are three possiblities, either the \textbf{address} is between other request, or it is not.
+\\
+In the case of there not being requests on either side of \textbf{address}, there are again two cases either the read head is headed towards the requests or it is not. If it is the function simply calcuates the distance between the head and the final request, otherwise it calculates the distance to the end of the platter and then the distance to the final request and adds them.
+\\
+  
+
+
+\subsubsection{ void CSCAN ( int address ,  int * req )}
+The CSCAN algorithm begins by sorting the requests using \textit{bucket\textunderscore sort}. Then it finds where in this array the \textbf{address} would be using \textit{find\textunderscore median}. At this point there are three possiblities, either the \textbf{address} is between other request, or it is not.
+
+\subsubsection{ void LOOK ( int address ,  int * req )}
+The LOOK algorithm begins by sorting the requests using \textit{bucket\textunderscore sort}. Then it finds where in this array the \textbf{address} would be using \textit{find\textunderscore median}. At this point there are three possiblities, either the \textbf{address} is between other request, or it is not.
+
+\subsubsection{ void CLOOK ( int address ,  int * req )}
+The CLOOK algorithm begins by sorting the requests using \textit{bucket\textunderscore sort}. Then it finds where in this array the \textbf{address} would be using \textit{find\textunderscore median}. At this point there are three possiblities, either the \textbf{address} is between other request, or it is not.
+
+\subsubsection{ void bucket\textunderscore sort ( int * arr )}
+This function performs a bucket sort on the array \textbf{arr}. The number of buckets to create is taken from \textbf{DISK\textunderscore MAX}. 
+
+\subsubsection{ void find\textunderscore median ( int address ,  int * req , int * low, int * high )}
+This function finds and returns the indicies between in the \textbf{req} array which \textbf{address} lies. If the address is below every number in the array then then \textbf{low} is returned as -1 and \textbf{high} is not set, inversely if the address exceeds all numbers in the array or is equal to them \textbf{high} is set to -1 and \textbf{low} is ignored.
+\\
+The array \textbf{req} is assumed to be sorted.
+\\
+This function finds the median by iterating through the array and finds the index whos successor holds a value which is greater than \textbf{address} and whos value is less than \textbf{address}. 
+
+
+
+\end{document}
+z
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
