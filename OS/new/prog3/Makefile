@@ -17,6 +17,7 @@ debug: $(TARGET)
 
 $(TARGET): $(OBJS)
 	$(CC)  $(FLAGS) -o $(TARGET) $(OBJS)
+	pdflatex *.tex
 
 main.o: main.c 
 	$(CC)  $(FLAGS) -c main.c
@@ -26,3 +27,4 @@ request.o: request.c
 
 clean:
 	$(RM) *.o *~ $(TARGET)
+	$(RM) *.log *.aux *.pdf
