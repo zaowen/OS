@@ -1,0 +1,14 @@
+#!/bin/bash
+
+for i in `seq 1 16`;
+do
+	if [ $i -gt 9 ]; then
+		echo Logging linux$i
+		ssh-copy-id -i ~/.ssh/id_rsa.pub 1973203@linux$i
+#		ssh 1973203@linux$i
+	else
+		echo Logging linux0$i
+		ssh-copy-id -i ~/.ssh/id_rsa.pub 1973203@linux0$i
+#		ssh 1973203@linux0$i
+	fi
+done
